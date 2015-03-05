@@ -52,7 +52,6 @@ def dynamic_programming_solver(items, item_count, capacity):
     output_data += ' '.join(map(str, taken))
     return output_data
 
-"""
 class Node():
     best_value = 0
     best_takens = []
@@ -133,82 +132,6 @@ def branch_and_bound_solver(items, item_count, capacity):
     output_data = '%s 0\n' % value
     output_data += ' '.join(map(str, taken))
     return output_data
-"""
-
-class Node():
-    best_value = 0
-    best_selections = []
-    capacity = 0
-    items_sorted = []
-    
-    def __init__(self, value, room, selections, previous_estimate):
-        self.value = value
-        self.room = room
-        self.estimate = previous_estimate if previous_estimate != -1 else get_best_estimate(Node.items_sorted, Node.capacity, selections)
-        self.selections = selections
-        self.index = len(self.selections)
-        
-    def get_left_child(self):
-        item = Node.items_sorted[self.index]
-        return Node(self.value + item.value, self.room - item.weight, self.selections + [1], self.estimate)
-    
-    def get_right_child(self):
-        item = Node.items_sorted[self.index]
-        return Node(self.value, self.room, self.selections + [0], -1)
-    
-    def is_leaf(self):
-        return self.index == len(Node.items_sorted)
-
-def get_best_estimate(items_sorted, capacity, selections):
-    value = 0
-    weight = 0
-    for idx in xrange(len(items_sorted)):
-        if idx < len(selections) and selections[idx] == 0: continue
-        i = items_sorted[idx]
-        if weight + i.weight > capacity:
-            value += i.value * (((capacity - weight) * 1.0) / i.weight) 
-            break
-        value += i.value
-        weight += i.weight
- 
-    return value
-
-def branch_and_bound_solver(items, item_count, capacity):
-    Node.best_value = 0
-    Node.best_selections = []
-    Node.capacity = capacity
-    Node.items_sorted = sorted(items, key = lambda i: i.density, reverse = True)
-    
-    root = Node(0, capacity, [], -1)
-    stack = [root.get_right_child(), root.get_left_child()]
-    while stack:
-        node = max(stack, key = lambda i: i.value)
-        stack.remove(node)
-        
-        if node.room < 0 or node.estimate < Node.best_value: continue
-        
-        if node.is_leaf() and node.value > Node.best_value:
-            Node.best_value = node.value
-            Node.best_selections = node.selections
-            continue
-        
-        if not node.is_leaf():
-            stack.append(node.get_left_child())
-            stack.append(node.get_right_child())
-    
-    selections = [0] * len(items)
-    value = 0
-    for idx in xrange(len(Node.best_selections)):
-        if Node.best_selections[idx] == 1: 
-		selections[Node.items_sorted[idx].index] = 1
-		value += Node.items_sorted[idx].value
-
-    # prepare the solution in the specified output format
-    output_data = '%s 0\n' % value
-    output_data += ' '.join(map(str, selections))
-    return output_data
-	
-
 
 def solve_it(input_data):
     # Modify this code to run your optimization algorithm
